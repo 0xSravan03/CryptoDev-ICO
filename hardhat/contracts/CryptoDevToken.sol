@@ -11,6 +11,7 @@ contract CryptoDevToken is ERC20, Ownable {
 
     // If caller holding CryptoDevs NFT, He can claim this much amount of Coins for free.(but still needs to pay for gas)
     uint256 public constant CLAIM_AMOUNT_PER_NFT = 10 * (10 ** 18);
+    mapping(address => bool) public tokenClaimed;
 
     ICryptoDevsNFT public CryptoDevsNFT;
 
@@ -39,7 +40,14 @@ contract CryptoDevToken is ERC20, Ownable {
     }
 
     // claim
-    function claim() external {}
+    function claim() external {
+        uint256 _nftAmount = CryptoDevsNFT.balanceOf(msg.sender);
+        require(_nftAmount > 0, "You are not owning any NFTs");
+        require(!tokenClaimed[msg.sender], "You have already Claimed");
+
+        _mint(msg.sender, _nftAmount * CLAIM_AMOUNT_PER_NFT);
+        tokenClaimed[msg.sender] = true;
+    }
 
     // Withdraw
     function withdraw() external onlyOwner {
