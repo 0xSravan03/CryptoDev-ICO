@@ -16,7 +16,7 @@ async function main() {
     console.log(`Name : ${name}`)
     console.log(`Symbol : ${symbol}`)
 
-    const maxSupply = await CryptoDevToken.maxSupply()
+    const maxSupply = await CryptoDevToken.getMaxSupply()
     console.log(`Max Supply : ${maxSupply}`)
 }
 
