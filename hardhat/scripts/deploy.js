@@ -1,10 +1,12 @@
 const { ethers } = require("hardhat")
 
+// Contract Address (Goerli Testnet) : 0x27598FfF1F7a70660bc00daaD8740022beB66119
+
 async function main() {
     const ContractFactory = await ethers.getContractFactory("CryptoDevToken")
     console.log("Deploying Contract...")
     const CryptoDevToken = await ContractFactory.deploy(
-        "1000",
+        "10000",
         "0x217f3aEAe122aC1bC7Ea63482e4d3FA52bb3Eb10"
     )
     await CryptoDevToken.deployed()
