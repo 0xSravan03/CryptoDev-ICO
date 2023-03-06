@@ -1,6 +1,7 @@
-# Sample Hardhat Project
+# Crypto Dev ICO
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+Crypto Dev ICO demonstrates the Initial Coin Offering usecase of Smartcontracts.
+This contract allows user to Mint token for 0.0001 Ethers and Claim tokens if they are holding any CryptoDevs NFT.
 
 Try running some of the following tasks:
 
