@@ -14,6 +14,9 @@ export default function Home() {
   const [totalTokens, setTotalTokens] = useState(0);
   const [tokensToBeClaimed, setTokensToBeClaimed] = useState(0);
   const [myToken, setMyToken] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [tokenAmount, setTokenAmount] = useState(0);
+  const [claimStatus, setClaimStatus] = useState(false);
 
   const connectWallet = async () => {
     try {
@@ -33,6 +36,9 @@ export default function Home() {
       await getTotalTokensMinted(contract);
       await getTokensToBeClaimed(contract);
       await getMyTokenBalance(contract);
+      await checkClaimStatus(contract);
+
+      return contract;
     } catch (error) {
       console.error(error.message);
     }
@@ -93,6 +99,49 @@ export default function Home() {
     }
   };
 
+  // Mint
+  const mintToken = async (amount) => {
+    try {
+      const contract = await connectWallet();
+      const tx = await contract.mint(amount, {
+        value: ethers.utils.parseEther((0.0001 * amount).toString()),
+      });
+      setLoading(true);
+      await tx.wait(3);
+      console.log("Minted");
+      setLoading(false);
+      await getMyTokenBalance(contract);
+      await getTotalTokensMinted(contract);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  // Claim
+  const claimToken = async () => {
+    try {
+      const contract = await connectWallet();
+      const tx = await contract.claim();
+      setLoading(true);
+      await tx.wait(3);
+      console.log("Token Claimed");
+      setLoading(false);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  const checkClaimStatus = async (contract) => {
+    try {
+      const signer = contract.signer;
+      const signerAddress = await signer.getAddress();
+      const claimStatus = await contract.tokenClaimed(signerAddress);
+      setClaimStatus(claimStatus);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
   useEffect(() => {
     web3modalRef.current = new Web3Modal({
       network: "goerli",
@@ -101,13 +150,81 @@ export default function Home() {
     });
   });
 
+  const renderButton = () => {
+    if (loading) {
+      return (
+        <div>
+          <button className={styles.button}>Loading...</button>
+        </div>
+      );
+    }
+    if (tokensToBeClaimed > 0 && !claimStatus) {
+      return (
+        <div>
+          <div className={styles.description}>
+            {tokensToBeClaimed * 10} Tokens can be claimed!
+          </div>
+          <button className={styles.button} onClick={claimToken}>
+            Claim Tokens
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <div style={{ display: "flex-col" }}>
+        <div>
+          <input
+            type="number"
+            placeholder="Amount of Tokens"
+            onChange={(e) => setTokenAmount(e.target.value.toString())}
+            className={styles.input}
+          />
+        </div>
+
+        <button
+          className={styles.button}
+          disabled={!(tokenAmount > 0)}
+          onClick={() => mintToken(tokenAmount)}
+        >
+          Mint Tokens
+        </button>
+      </div>
+    );
+  };
+
   return (
     <main className={styles.main}>
-      <button onClick={handleClick}>Connect Wallet</button>
       <div>
-        {tokensMinted} / {ethers.utils.formatEther(totalTokens)}
+        <h1 className={styles.title}>Welcome to Crypto Devs ICO!</h1>
+        <div className={styles.description}>
+          You can claim or mint Crypto Dev tokens here
+        </div>
+        {walletConnected ? (
+          <div>
+            <div className={styles.description}>
+              You have minted {ethers.utils.formatEther(myToken)} Crypto Dev
+              Tokens
+            </div>
+            <div className={styles.description}>
+              Overall {ethers.utils.formatEther(tokensMinted)}/10000 have been
+              minted!!!
+            </div>
+            {renderButton()}
+          </div>
+        ) : (
+          <button onClick={handleClick} className={styles.button}>
+            Connect wallet
+          </button>
+        )}
       </div>
-      <div>{tokensToBeClaimed}</div>
+      <div>
+        <img className={styles.image} src="./0.svg" />
+      </div>
+
+      <footer className={styles.footer}>
+        Made with &#10084; by Crypto Devs
+      </footer>
     </main>
   );
 }
