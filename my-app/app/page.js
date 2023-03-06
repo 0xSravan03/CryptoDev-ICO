@@ -107,7 +107,7 @@ export default function Home() {
         value: ethers.utils.parseEther((0.0001 * amount).toString()),
       });
       setLoading(true);
-      await tx.wait(3);
+      await tx.wait();
       console.log("Minted");
       setLoading(false);
       await getMyTokenBalance(contract);
@@ -123,7 +123,7 @@ export default function Home() {
       const contract = await connectWallet();
       const tx = await contract.claim();
       setLoading(true);
-      await tx.wait(3);
+      await tx.wait();
       console.log("Token Claimed");
       setLoading(false);
     } catch (error) {
